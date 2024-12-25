@@ -15,13 +15,11 @@ export default function Home() {
     setIsError(false);
 
     try {
-      // Step 1: Extract UUID
       const uuid = extractUUID(link);
       if (!uuid) {
         throw new Error("Invalid URL: No valid UUID found.");
       }
 
-      // Step 2: Fetch listing data using the extracted UUID
       const data = await getListing(uuid);
       setResponse(`Listing Title: ${data.result.listing.listingTitle}`);
       setIsError(false);
