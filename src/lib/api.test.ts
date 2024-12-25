@@ -1,5 +1,3 @@
-// src/lib/api.test.ts
-
 import { extractUUID, getListing, handleApiError } from "./api";
 
 global.fetch = jest.fn();
