@@ -1,0 +1,12 @@
+echo "🔍 Running lint, type-check, and tests before commit..."
+
+npm run lint
+npm run type-check
+npm run test
+
+if [ $? -ne 0 ]; then
+  echo "❌ Checks failed. Commit aborted."
+  exit 1
+fi
+
+echo "✅ All checks passed. Proceeding with commit."
