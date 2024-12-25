@@ -4,23 +4,29 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import LinkInput from "@/components/LinkInput";
 import ResponseMessage from "@/components/ResponseMessage";
+import { extractUUID, getListing } from "@/lib/api";
 
 export default function Home() {
   const [response, setResponse] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
 
   const handleSubmit = async (link: string) => {
+    setResponse(null);
+    setIsError(false);
+
     try {
-      const res = await fetch("/api/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ link }),
-      });
-      const data = await res.json();
-      setResponse(data.message);
+      // Step 1: Extract UUID
+      const uuid = extractUUID(link);
+      if (!uuid) {
+        throw new Error("Invalid URL: No valid UUID found.");
+      }
+
+      // Step 2: Fetch listing data using the extracted UUID
+      const data = await getListing(uuid);
+      setResponse(`Listing Title: ${data.result.listing.listingTitle}`);
       setIsError(false);
     } catch {
-      setResponse("Failed to fetch data");
+      setResponse("An error occurred while fetching data.");
       setIsError(true);
     }
   };
