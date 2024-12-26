@@ -4,6 +4,7 @@ import { useState } from "react";
 import Header from "@/components/Header";
 import LinkInput from "@/components/LinkInput";
 import ResponseMessage from "@/components/ResponseMessage";
+import InvoiceButton from "@/components/InvoiceButton";
 import { extractUUID, getListing } from "@/lib/api";
 import { GetListingResponse } from "@/lib/types";
 
@@ -46,6 +47,7 @@ export default function Home() {
             {response.result.listing.addressState}
           </p>
           <p>Mileage: {response.result.listing.mileage} miles</p>
+          <InvoiceButton data={response} />
         </div>
       )}
       {isError && (

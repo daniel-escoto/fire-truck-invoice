@@ -1,50 +1,71 @@
 "use client";
 
+import { useState } from "react";
 import jsPDF from "jspdf";
 import Button from "@/components/Button";
+import Modal from "@/components/Modal"; // We'll create this next
+import { GetListingResponse } from "@/lib/types";
 
-interface InvoiceData {
-  invoiceNumber: string;
-  date: string;
-  customerName: string;
-  amount: number;
-  items: { name: string; price: number }[];
+interface InvoiceButtonProps {
+  data: GetListingResponse;
 }
 
-export default function InvoiceButton() {
-  const generatePDF = () => {
-    const invoice: InvoiceData = {
-      invoiceNumber: "INV-001",
-      date: "2024-12-23",
-      customerName: "John Doe",
-      amount: 1000,
-      items: [
-        { name: "Fire Truck Repair", price: 600 },
-        { name: "Engine Maintenance", price: 400 },
-      ],
-    };
+export default function InvoiceButton({ data }: InvoiceButtonProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
 
+  const generatePDF = () => {
     const doc = new jsPDF();
 
     doc.setFontSize(20);
     doc.text("Invoice", 105, 20, { align: "center" });
     doc.setFontSize(12);
-    doc.text(`Invoice Number: ${invoice.invoiceNumber}`, 20, 40);
-    doc.text(`Date: ${invoice.date}`, 20, 50);
-    doc.text(`Customer: ${invoice.customerName}`, 20, 60);
-    doc.text(`Amount: $${invoice.amount}`, 20, 70);
-    doc.text("Items:", 20, 80);
+    doc.text(`Listing Title: ${data.result.listing.listingTitle}`, 20, 40);
+    doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 50);
+    doc.text(
+      `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
+      20,
+      60
+    );
+    doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 70);
+    doc.text("Thank you for your business!", 105, 90, { align: "center" });
 
-    let y = 90;
-    invoice.items.forEach((item) => {
-      doc.text(`- ${item.name}: $${item.price}`, 20, y);
-      y += 10;
-    });
+    const pdfUri = doc.output("datauristring");
+    setPdfDataUri(pdfUri);
+    setIsModalOpen(true);
+  };
 
-    doc.text("Thank you for your business!", 105, y + 10, { align: "center" });
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+
+    doc.setFontSize(20);
+    doc.text("Invoice", 105, 20, { align: "center" });
+    doc.setFontSize(12);
+    doc.text(`Listing Title: ${data.result.listing.listingTitle}`, 20, 40);
+    doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 50);
+    doc.text(
+      `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
+      20,
+      60
+    );
+    doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 70);
+    doc.text("Thank you for your business!", 105, 90, { align: "center" });
 
     doc.save("invoice.pdf");
   };
 
-  return <Button onClick={generatePDF}>Generate PDF Invoice</Button>;
+  return (
+    <>
+      <Button onClick={generatePDF}>Preview Invoice PDF</Button>
+      {isModalOpen && pdfDataUri && (
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <iframe src={pdfDataUri} className="w-full h-96" />
+          <div className="flex justify-center gap-4 mt-4">
+            <Button onClick={downloadPDF}>Download PDF</Button>
+            <Button onClick={() => setIsModalOpen(false)}>Close</Button>
+          </div>
+        </Modal>
+      )}
+    </>
+  );
 }
