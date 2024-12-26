@@ -1,3 +1,5 @@
+import { GetListingResponse } from "./types";
+
 export function extractUUID(url: string): string | null {
   const UUID_REGEX =
     /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/;
@@ -6,7 +8,7 @@ export function extractUUID(url: string): string | null {
   return match ? match[0] : null;
 }
 
-export async function getListing(uuid: string) {
+export async function getListing(uuid: string): Promise<GetListingResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   try {
@@ -20,7 +22,8 @@ export async function getListing(uuid: string) {
       throw new Error(`Error: ${response.status}`);
     }
 
-    return await response.json();
+    const data: GetListingResponse = await response.json();
+    return data;
   } catch (error: unknown) {
     handleApiError(error);
   }

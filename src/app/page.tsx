@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import LinkInput from "@/components/LinkInput";
 import ResponseMessage from "@/components/ResponseMessage";
 import { extractUUID, getListing } from "@/lib/api";
+import { GetListingResponse } from "@/lib/types";
 
 export default function Home() {
   const [response, setResponse] = useState<string | null>(null);
@@ -20,12 +21,13 @@ export default function Home() {
         throw new Error("Invalid URL: No valid UUID found.");
       }
 
-      const data = await getListing(uuid);
+      const data: GetListingResponse = await getListing(uuid);
       setResponse(`Listing Title: ${data.result.listing.listingTitle}`);
       setIsError(false);
-    } catch {
+    } catch (error) {
       setResponse("An error occurred while fetching data.");
       setIsError(true);
+      console.error(error);
     }
   };
 
