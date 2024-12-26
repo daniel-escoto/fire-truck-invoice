@@ -3,7 +3,7 @@
 import { useState } from "react";
 import jsPDF from "jspdf";
 import Button from "@/components/Button";
-import Modal from "@/components/Modal"; // We'll create this next
+import Modal from "@/components/Modal";
 import { GetListingResponse } from "@/lib/types";
 
 interface InvoiceButtonProps {
