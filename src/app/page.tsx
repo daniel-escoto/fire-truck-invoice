@@ -8,7 +8,7 @@ import { extractUUID, getListing } from "@/lib/api";
 import { GetListingResponse } from "@/lib/types";
 
 export default function Home() {
-  const [response, setResponse] = useState<string | null>(null);
+  const [response, setResponse] = useState<GetListingResponse | null>(null);
   const [isError, setIsError] = useState(false);
 
   const handleSubmit = async (link: string) => {
@@ -22,10 +22,10 @@ export default function Home() {
       }
 
       const data: GetListingResponse = await getListing(uuid);
-      setResponse(`Listing Title: ${data.result.listing.listingTitle}`);
+      setResponse(data);
       setIsError(false);
     } catch (error) {
-      setResponse("An error occurred while fetching data.");
+      setResponse(null);
       setIsError(true);
       console.error(error);
     }
@@ -35,7 +35,25 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
       <Header />
       <LinkInput onSubmit={handleSubmit} />
-      {response && <ResponseMessage message={response} isError={isError} />}
+      {response && !isError && (
+        <div className="mt-4 text-center">
+          <h2 className="text-xl font-bold">
+            {response.result.listing.listingTitle}
+          </h2>
+          <p>Price: ${response.result.listing.sellingPrice}</p>
+          <p>
+            Location: {response.result.listing.addressCity},{" "}
+            {response.result.listing.addressState}
+          </p>
+          <p>Mileage: {response.result.listing.mileage} miles</p>
+        </div>
+      )}
+      {isError && (
+        <ResponseMessage
+          message="An error occurred while fetching data."
+          isError={isError}
+        />
+      )}
     </div>
   );
 }
