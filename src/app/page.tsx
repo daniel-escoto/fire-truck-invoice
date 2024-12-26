@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import Header from "@/components/Header";
-import Button from "@/components/Button";
-import Modal from "@/components/Modal";
+import InvoiceForm from "@/components/InvoiceForm";
+import ErrorMessage from "@/components/ErrorMessage";
+import InvoiceModal from "@/components/InvoiceModal";
 import { extractUUID, getListing } from "@/lib/api";
 import { GetListingResponse } from "@/lib/types";
 import jsPDF from "jspdf";
 
 export default function Home() {
-  const [link, setLink] = useState("");
   const [response, setResponse] = useState<GetListingResponse | null>(null);
   const [isError, setIsError] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export default function Home() {
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (link: string) => {
     setResponse(null);
     setIsError(false);
     setErrorMessage(null);
@@ -54,9 +54,6 @@ export default function Home() {
       if (error instanceof Error) {
         setErrorMessage(error.message);
         console.error("Error:", error.message);
-      } else if (typeof error === "string") {
-        setErrorMessage(error);
-        console.error("Error:", error);
       } else {
         setErrorMessage("An unknown error occurred.");
         console.error("Unknown Error:", error);
@@ -88,29 +85,14 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
       <Header />
-      <div className="flex flex-col gap-4 items-center w-full max-w-md">
-        <input
-          type="text"
-          value={link}
-          onChange={(e) => setLink(e.target.value)}
-          placeholder="Paste a link"
-          className="w-full border p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
-        />
-        <Button onClick={handleSubmit} disabled={!link.trim() || isLoading}>
-          {isLoading ? "Generating..." : "Generate Invoice"}
-        </Button>
-      </div>
-      {isError && errorMessage && (
-        <p className="text-red-500 mt-4">{errorMessage}</p>
-      )}
+      <InvoiceForm onSubmit={handleSubmit} isLoading={isLoading} />
+      {isError && errorMessage && <ErrorMessage message={errorMessage} />}
       {isModalOpen && pdfDataUri && (
-        <Modal onClose={() => setIsModalOpen(false)}>
-          <iframe src={pdfDataUri} className="w-full h-96" />
-          <div className="flex justify-center gap-4 mt-4">
-            <Button onClick={downloadPDF}>Download PDF</Button>
-            <Button onClick={() => setIsModalOpen(false)}>Close</Button>
-          </div>
-        </Modal>
+        <InvoiceModal
+          pdfDataUri={pdfDataUri}
+          onDownload={downloadPDF}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
     </div>
   );
