@@ -1,21 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import Button from "@/components/Button";
 
 interface InvoiceFormProps {
-  onSubmit: (link: string) => void;
+  link: string;
+  setLink: (link: string) => void;
+  onSubmit: () => void;
   isLoading: boolean;
 }
 
-export default function InvoiceForm({ onSubmit, isLoading }: InvoiceFormProps) {
-  const [link, setLink] = useState("");
-
-  const handleClick = () => {
-    if (!link.trim()) return;
-    onSubmit(link);
-  };
-
+export default function InvoiceForm({
+  link,
+  setLink,
+  onSubmit,
+  isLoading,
+}: InvoiceFormProps) {
   return (
     <div className="flex flex-col gap-4 items-center w-full max-w-md">
       <input
@@ -25,7 +24,7 @@ export default function InvoiceForm({ onSubmit, isLoading }: InvoiceFormProps) {
         placeholder="Paste a link"
         className="w-full border p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
       />
-      <Button onClick={handleClick} disabled={!link.trim() || isLoading}>
+      <Button onClick={onSubmit} disabled={!link.trim() || isLoading}>
         {isLoading ? "Generating..." : "Generate Invoice"}
       </Button>
     </div>
