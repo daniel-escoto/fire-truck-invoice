@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import InvoiceForm from "@/components/InvoiceForm";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -17,13 +17,38 @@ export default function Home() {
   const handleSubmit = async () => {
     try {
       const fetchedData = await fetchInvoiceData(link);
-      const pdfUri = generateInvoicePDF(fetchedData);
-      setPdfDataUri(pdfUri);
+      const pdfUri = await generateInvoicePDF(fetchedData);
+
+      // Convert Data URI to Blob URL
+      const byteString = atob(pdfUri.split(",")[1]);
+      const mimeString = pdfUri.split(",")[0].split(":")[1].split(";")[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      const blob = new Blob([ab], { type: mimeString });
+      const blobUrl = URL.createObjectURL(blob);
+
+      setPdfDataUri(blobUrl);
       setIsModalOpen(true);
-    } catch {
-      console.error("Failed to fetch or generate PDF");
+    } catch (error) {
+      console.error("Failed to fetch or generate PDF", error);
     }
   };
+
+  const handleDownload = async () => {
+    if (!data) return;
+    try {
+      await downloadInvoicePDF(data);
+    } catch (error) {
+      console.error("Failed to download PDF:", error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("PDF Data URI:", pdfDataUri);
+  }, [pdfDataUri]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
@@ -38,7 +63,7 @@ export default function Home() {
       {isModalOpen && pdfDataUri && data && (
         <InvoiceModal
           pdfDataUri={pdfDataUri}
-          onDownload={() => downloadInvoicePDF(data)}
+          onDownload={handleDownload}
           onClose={() => setIsModalOpen(false)}
         />
       )}

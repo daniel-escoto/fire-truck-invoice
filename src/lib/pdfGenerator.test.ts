@@ -1,6 +1,45 @@
 import { generateInvoicePDF } from "./pdfGenerator";
 import { GetListingResponse } from "@/lib/types";
 
+// Mock fetch globally for loading the image
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    ok: true,
+    blob: () =>
+      Promise.resolve(
+        new Blob(
+          [
+            atob(
+              "iVBORw0KGgoAAAANSUhEUgAAAAUA" +
+                "AAAFCAYAAACNbyblAAAAHElEQVQI12P4" +
+                "//8/w38GIAXDIBKE0DHxgljNBAAO" +
+                "9TXL0Y4OHwAAAABJRU5ErkJggg=="
+            ),
+          ],
+          { type: "image/png" }
+        )
+      ),
+  })
+) as jest.Mock;
+
+// Mock FileReader globally
+class FileReaderMock {
+  result: string | null = null;
+  onloadend: (() => void) | null = null;
+  onerror: (() => void) | null = null;
+
+  readAsDataURL() {
+    this.result =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA" +
+      "AAAFCAYAAACNbyblAAAAHElEQVQI12P4" +
+      "//8/w38GIAXDIBKE0DHxgljNBAAO" +
+      "9TXL0Y4OHwAAAABJRU5ErkJggg==";
+    if (this.onloadend) this.onloadend();
+  }
+}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).FileReader = FileReaderMock;
+
 describe("pdfGenerator", () => {
   const mockData: GetListingResponse = {
     result: {
@@ -48,8 +87,30 @@ describe("pdfGenerator", () => {
     error: "",
   };
 
-  it("should generate a valid PDF data URI", () => {
-    const pdfUri = generateInvoicePDF(mockData);
+  beforeAll(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (global as any).window = { location: { origin: "http://localhost:3000" } };
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should generate a valid PDF data URI", async () => {
+    const pdfUri = await generateInvoicePDF(mockData);
     expect(pdfUri).toMatch(/^data:application\/pdf(;filename=.+)?;base64,/);
+  });
+
+  it("should throw an error if the image fails to load", async () => {
+    (global.fetch as jest.Mock).mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        statusText: "Failed to fetch",
+      })
+    );
+
+    await expect(generateInvoicePDF(mockData)).rejects.toThrow(
+      "Failed to fetch image: Failed to fetch"
+    );
   });
 });
