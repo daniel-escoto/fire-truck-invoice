@@ -42,7 +42,7 @@ export default function InvoiceForm({
   };
 
   return (
-    <div className="flex flex-col gap-4 items-center w-full max-w-md border border-neutral-200 rounded-xl bg-white p-6 shadow-[0_10px_20px_rgb(0,0,0,0.05)]">
+    <div className="flex flex-col gap-4 items-center w-full max-w-md border border-neutral-200 dark:border-neutral-700 rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-[0_10px_20px_rgb(0,0,0,0.05)] dark:shadow-[0_10px_20px_rgb(0,0,0,0.2)]">
       <TextInput
         label="Buyer Name"
         value={buyerName}
