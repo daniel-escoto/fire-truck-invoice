@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet } from "@react-pdf/renderer";
 import { InvoiceHeader } from "./InvoiceHeader";
 import { BuyerInfo } from "./BuyerInfo";
 import { SellerInfo } from "./SellerInfo";
@@ -8,6 +8,15 @@ import { TechnicalSpecifications } from "./TechnicalSpecifications";
 import { AuctionDetails } from "./AuctionDetails";
 import { InvoiceFooter } from "./InvoiceFooter";
 import { GetListingResponse } from "@/lib/types";
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 30,
+    fontFamily: "Helvetica",
+    fontSize: 12,
+    color: "#333",
+  },
+});
 
 interface InvoiceDocumentProps {
   data: GetListingResponse;
@@ -24,7 +33,7 @@ export default function InvoiceDocument({
 
   return (
     <Document>
-      <Page>
+      <Page size="A4" style={styles.page}>
         <InvoiceHeader />
         <BuyerInfo name={buyerName} email={buyerEmail} />
         <SellerInfo
