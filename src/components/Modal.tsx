@@ -27,22 +27,21 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
         </Transition.Child>
 
         {/* Modal Panel */}
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4">
-            <Transition.Child
-              as={Fragment}
-              enter="transition-transform duration-300"
-              enterFrom="scale-95 opacity-0"
-              enterTo="scale-100 opacity-100"
-              leave="transition-transform duration-200"
-              leaveFrom="scale-100 opacity-100"
-              leaveTo="scale-95 opacity-0"
-            >
-              <Dialog.Panel className="w-full max-w-md rounded-xl bg-white dark:bg-neutral-900 p-6 shadow-xl">
-                {children}
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
+        <div className="fixed inset-0 flex items-center justify-center p-4 sm:p-8">
+          <Transition.Child
+            as={Fragment}
+            enter="transition-transform duration-300"
+            enterFrom="scale-95 opacity-0"
+            enterTo="scale-100 opacity-100"
+            leave="transition-transform duration-200"
+            leaveFrom="scale-100 opacity-100"
+            leaveTo="scale-95 opacity-0"
+          >
+            <Dialog.Panel className="w-full max-w-4xl sm:max-w-5xl md:max-w-6xl max-h-[90vh] rounded-xl bg-white dark:bg-neutral-900 p-6 md:p-8 lg:p-10 shadow-2xl flex flex-col">
+              {/* Modal Content */}
+              <div className="flex-1 overflow-y-auto">{children}</div>
+            </Dialog.Panel>
+          </Transition.Child>
         </div>
       </Dialog>
     </Transition>

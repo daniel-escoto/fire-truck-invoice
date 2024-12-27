@@ -23,34 +23,32 @@ export default function InvoiceModal({
 }: InvoiceModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex flex-col items-center gap-4">
-        {/* PDF Viewer */}
-        <div className="w-full h-96 border border-gray-200 rounded-md overflow-hidden">
-          <PDFViewer style={{ width: "100%", height: "100%" }}>
+      {/* PDF Viewer */}
+      <div className="flex-1 overflow-y-auto border border-gray-200 rounded-md">
+        <PDFViewer style={{ width: "100%", height: "60vh" }}>
+          <InvoiceDocument
+            data={data}
+            buyerName={buyerName}
+            buyerEmail={buyerEmail}
+          />
+        </PDFViewer>
+      </div>
+
+      {/* Actions */}
+      <div className="flex justify-end gap-4 mt-4 border-t pt-4">
+        <PDFDownloadLink
+          document={
             <InvoiceDocument
               data={data}
               buyerName={buyerName}
               buyerEmail={buyerEmail}
             />
-          </PDFViewer>
-        </div>
-
-        {/* Actions */}
-        <div className="flex justify-center gap-4 mt-4">
-          <PDFDownloadLink
-            document={
-              <InvoiceDocument
-                data={data}
-                buyerName={buyerName}
-                buyerEmail={buyerEmail}
-              />
-            }
-            fileName="invoice.pdf"
-          >
-            <Button>Download PDF</Button>
-          </PDFDownloadLink>
-          <Button onClick={onClose}>Close</Button>
-        </div>
+          }
+          fileName="invoice.pdf"
+        >
+          <Button>Download PDF</Button>
+        </PDFDownloadLink>
+        <Button onClick={onClose}>Close</Button>
       </div>
     </Modal>
   );
