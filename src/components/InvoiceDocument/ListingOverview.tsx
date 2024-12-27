@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, StyleSheet } from "@react-pdf/renderer";
+import { Text, View, StyleSheet, Link } from "@react-pdf/renderer";
 import { InvoiceSection } from "./InvoiceSection";
 
 interface ListingOverviewProps {
@@ -7,6 +7,7 @@ interface ListingOverviewProps {
   price: number;
   brand: string;
   vin: string | null;
+  link: string;
 }
 
 const styles = StyleSheet.create({
@@ -22,6 +23,21 @@ const styles = StyleSheet.create({
   text: {
     marginBottom: 2,
   },
+  linkContainer: {
+    marginTop: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  label: {
+    fontSize: 10,
+    marginRight: 4,
+  },
+  link: {
+    color: "blue",
+    textDecoration: "underline",
+    fontSize: 10,
+    wordBreak: "break-all", // Prevents overflow if the URL is long
+  },
 });
 
 export function ListingOverview({
@@ -29,6 +45,7 @@ export function ListingOverview({
   price,
   brand,
   vin,
+  link,
 }: ListingOverviewProps) {
   return (
     <InvoiceSection title="Listing Overview">
@@ -37,6 +54,14 @@ export function ListingOverview({
         <Text style={styles.text}>Price: ${price}</Text>
         <Text style={styles.text}>Brand: {brand}</Text>
         <Text style={styles.text}>VIN: {vin || "N/A"}</Text>
+        {link && (
+          <View style={styles.linkContainer}>
+            <Text style={styles.label}>View Listing:</Text>
+            <Link src={link} style={styles.link}>
+              {link}
+            </Link>
+          </View>
+        )}
       </View>
     </InvoiceSection>
   );

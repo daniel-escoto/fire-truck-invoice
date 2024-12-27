@@ -12,6 +12,7 @@ interface InvoiceModalProps {
   buyerEmail: string;
   onClose: () => void;
   isOpen: boolean;
+  link: string;
 }
 
 export default function InvoiceModal({
@@ -20,6 +21,7 @@ export default function InvoiceModal({
   buyerEmail,
   onClose,
   isOpen,
+  link,
 }: InvoiceModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -30,6 +32,7 @@ export default function InvoiceModal({
             data={data}
             buyerName={buyerName}
             buyerEmail={buyerEmail}
+            link={link}
           />
         </PDFViewer>
       </div>
@@ -42,6 +45,7 @@ export default function InvoiceModal({
               data={data}
               buyerName={buyerName}
               buyerEmail={buyerEmail}
+              link={link}
             />
           }
           fileName="invoice.pdf"

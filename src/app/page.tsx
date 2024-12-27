@@ -47,6 +47,7 @@ export default function Home() {
             buyerEmail={buyerEmail}
             onClose={() => setIsModalOpen(false)}
             isOpen={isModalOpen}
+            link={link}
           />
         )}
       </main>

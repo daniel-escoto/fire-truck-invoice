@@ -32,12 +32,14 @@ interface InvoiceDocumentProps {
   data: GetListingResponse;
   buyerName: string;
   buyerEmail: string;
+  link: string;
 }
 
 export default function InvoiceDocument({
   data,
   buyerName,
   buyerEmail,
+  link,
 }: InvoiceDocumentProps) {
   const { listing } = data.result;
 
@@ -51,6 +53,7 @@ export default function InvoiceDocument({
           price={listing.sellingPrice}
           title={listing.listingTitle}
           vin={listing.vin}
+          link={link}
         />
 
         <TechnicalSpecifications

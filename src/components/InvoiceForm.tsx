@@ -28,7 +28,6 @@ export default function InvoiceForm({
   const [emailError, setEmailError] = useState<string>("");
   const [linkError, setLinkError] = useState<string>("");
 
-  // Validate Email
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -43,7 +42,6 @@ export default function InvoiceForm({
     }
   };
 
-  // Validate URL
   const validateURL = (url: string) => {
     const urlRegex =
       /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
