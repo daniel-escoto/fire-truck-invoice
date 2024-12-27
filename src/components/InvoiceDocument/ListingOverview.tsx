@@ -7,7 +7,6 @@ interface ListingOverviewProps {
   price: number;
   brand: string;
   vin: string | null;
-  imageUrl: string | null;
 }
 
 const styles = StyleSheet.create({
@@ -23,11 +22,6 @@ const styles = StyleSheet.create({
   text: {
     marginBottom: 2,
   },
-  link: {
-    color: "blue",
-    textDecoration: "underline",
-    fontSize: 10,
-  },
 });
 
 export function ListingOverview({
@@ -35,7 +29,6 @@ export function ListingOverview({
   price,
   brand,
   vin,
-  imageUrl,
 }: ListingOverviewProps) {
   return (
     <InvoiceSection title="Listing Overview">
@@ -44,7 +37,6 @@ export function ListingOverview({
         <Text style={styles.text}>Price: ${price}</Text>
         <Text style={styles.text}>Brand: {brand}</Text>
         <Text style={styles.text}>VIN: {vin || "N/A"}</Text>
-        {imageUrl && <Text style={styles.link}>Image: {imageUrl}</Text>}
       </View>
     </InvoiceSection>
   );
