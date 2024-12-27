@@ -58,8 +58,20 @@ export default function InvoiceDocument({
 
         <TechnicalSpecifications
           age={listing.itemAge}
-          dimensions={`${listing.itemHeight} x ${listing.itemWidth}`}
+          dimensions={
+            listing.itemLength && listing.itemWidth && listing.itemHeight
+              ? `${listing.itemLength} x ${listing.itemWidth} x ${listing.itemHeight}`
+              : ""
+          }
           weight={listing.itemWeight}
+          mileage={listing.mileage}
+          hasServiceRecords={listing.hasServiceRecords}
+          hasRust={listing.hasRust}
+          isFourWheelDrive={listing.isFourWheelDrive}
+          tankSize={listing.tankSize}
+          pumpSize={listing.pumpSize}
+          aerialLength={listing.aerialLength}
+          description={listing.listingDescription || "No description provided"}
         />
 
         {listing.isAuction && <AuctionDetails {...listing} />}
