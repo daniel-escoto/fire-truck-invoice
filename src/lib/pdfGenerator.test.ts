@@ -87,6 +87,9 @@ describe("pdfGenerator", () => {
     error: "",
   };
 
+  const buyerName = "John Doe";
+  const buyerEmail = "johndoe@example.com";
+
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).window = { location: { origin: "http://localhost:3000" } };
@@ -97,11 +100,11 @@ describe("pdfGenerator", () => {
   });
 
   it("should generate a valid PDF data URI", async () => {
-    const pdfUri = await generateInvoicePDF(mockData);
+    const pdfUri = await generateInvoicePDF(mockData, buyerName, buyerEmail);
     expect(pdfUri).toMatch(/^data:application\/pdf(;filename=.+)?;base64,/);
   });
 
-  it("should throw an error if the image fails to load", async () => {
+  it("should handle image fetch failure gracefully and continue PDF generation", async () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
         ok: false,
@@ -109,8 +112,8 @@ describe("pdfGenerator", () => {
       })
     );
 
-    await expect(generateInvoicePDF(mockData)).rejects.toThrow(
-      "Failed to fetch image: Failed to fetch"
-    );
+    await expect(
+      generateInvoicePDF(mockData, buyerName, buyerEmail)
+    ).resolves.toMatch(/^data:application\/pdf(;filename=.+)?;base64,/);
   });
 });

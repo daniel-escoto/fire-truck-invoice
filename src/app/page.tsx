@@ -11,13 +11,19 @@ import { generateInvoicePDF, downloadInvoicePDF } from "@/lib/pdfGenerator";
 export default function Home() {
   const { data, error, isLoading, fetchInvoiceData } = useInvoice();
   const [link, setLink] = useState("");
+  const [buyerName, setBuyerName] = useState("");
+  const [buyerEmail, setBuyerEmail] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     try {
       const fetchedData = await fetchInvoiceData(link);
-      const pdfUri = await generateInvoicePDF(fetchedData);
+      const pdfUri = await generateInvoicePDF(
+        fetchedData,
+        buyerName,
+        buyerEmail
+      );
 
       // Convert Data URI to Blob URL
       const byteString = atob(pdfUri.split(",")[1]);
@@ -40,7 +46,7 @@ export default function Home() {
   const handleDownload = async () => {
     if (!data) return;
     try {
-      await downloadInvoicePDF(data);
+      await downloadInvoicePDF(data, buyerName, buyerEmail);
     } catch (error) {
       console.error("Failed to download PDF:", error);
     }
@@ -52,6 +58,10 @@ export default function Home() {
       <InvoiceForm
         link={link}
         setLink={setLink}
+        buyerName={buyerName}
+        setBuyerName={setBuyerName}
+        buyerEmail={buyerEmail}
+        setBuyerEmail={setBuyerEmail}
         onSubmit={handleSubmit}
         isLoading={isLoading}
       />

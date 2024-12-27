@@ -1,10 +1,15 @@
 "use client";
 
 import Button from "@/components/Button";
+import TextInput from "@/components/TextInput";
 
 interface InvoiceFormProps {
   link: string;
   setLink: (link: string) => void;
+  buyerName: string;
+  setBuyerName: (name: string) => void;
+  buyerEmail: string;
+  setBuyerEmail: (email: string) => void;
   onSubmit: () => void;
   isLoading: boolean;
 }
@@ -12,19 +17,43 @@ interface InvoiceFormProps {
 export default function InvoiceForm({
   link,
   setLink,
+  buyerName,
+  setBuyerName,
+  buyerEmail,
+  setBuyerEmail,
   onSubmit,
   isLoading,
 }: InvoiceFormProps) {
   return (
     <div className="flex flex-col gap-4 items-center w-full max-w-md">
-      <input
-        type="text"
-        value={link}
-        onChange={(e) => setLink(e.target.value)}
-        placeholder="Paste a link"
-        className="w-full border p-2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+      <TextInput
+        label="Buyer Name"
+        value={buyerName}
+        onChange={setBuyerName}
+        placeholder="Enter buyer's name"
+        required
       />
-      <Button onClick={onSubmit} disabled={!link.trim() || isLoading}>
+      <TextInput
+        label="Buyer Email"
+        value={buyerEmail}
+        onChange={setBuyerEmail}
+        placeholder="Enter buyer's email"
+        type="email"
+        required
+      />
+      <TextInput
+        label="Listing Link"
+        value={link}
+        onChange={setLink}
+        placeholder="Paste a listing link"
+        required
+      />
+      <Button
+        onClick={onSubmit}
+        disabled={
+          !link.trim() || !buyerName.trim() || !buyerEmail.trim() || isLoading
+        }
+      >
         {isLoading ? "Generating..." : "Generate Invoice"}
       </Button>
     </div>
