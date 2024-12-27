@@ -59,6 +59,31 @@ async function createHeader(doc: jsPDF, data: GetListingResponse) {
 }
 
 /**
+ * Creates the buyer and seller section of the invoice PDF.
+ * @param doc - The jsPDF document instance.
+ * @param buyerName - Name of the buyer.
+ * @param buyerEmail - Email of the buyer.
+ * @param sellerEmail - Email of the seller.
+ */
+function createBuyerSellerSection(
+  doc: jsPDF,
+  buyerName: string,
+  buyerEmail: string,
+  sellerEmail: string
+) {
+  // 🧑 **Buyer Details**
+  doc.setFontSize(14).text("Buyer Information:", 20, 145);
+  doc.setFontSize(12);
+  doc.text(`Name: ${buyerName}`, 20, 155);
+  doc.text(`Email: ${buyerEmail}`, 20, 165);
+
+  // 🏢 **Seller Details**
+  doc.setFontSize(14).text("Seller Information:", 20, 180);
+  doc.setFontSize(12);
+  doc.text(`Email: ${sellerEmail}`, 20, 190);
+}
+
+/**
  * Generates a PDF invoice as a data URI.
  * @param data - Listing response data.
  * @param buyerName - Name of the buyer.
@@ -72,27 +97,27 @@ export async function generateInvoicePDF(
 ): Promise<string> {
   const doc = new jsPDF();
 
-  await createHeader(doc, data); // 📝 Use the new header function
+  await createHeader(doc, data); // 📝 Header Section
+  createBuyerSellerSection(
+    doc,
+    buyerName,
+    buyerEmail,
+    data.result.listing.user.email
+  ); // 🧑 Buyer & Seller Section
 
-  // Buyer Details
-  doc.setFontSize(14).text("Buyer Information:", 20, 145);
+  // 📋 **Listing Details**
+  doc.setFontSize(14).text("Listing Details:", 20, 210);
   doc.setFontSize(12);
-  doc.text(`Name: ${buyerName}`, 20, 155);
-  doc.text(`Email: ${buyerEmail}`, 20, 165);
-
-  // Listing Details
-  doc.setFontSize(14).text("Listing Details:", 20, 180);
-  doc.setFontSize(12);
-  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 190);
-  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 200);
+  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 220);
+  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 230);
   doc.text(
     `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
     20,
-    210
+    240
   );
-  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 220);
+  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 250);
 
-  // Footer
+  // 📌 **Footer**
   doc.line(20, 260, 190, 260); // Horizontal line at footer
   doc.setFontSize(10).text("Thank you for your business!", 105, 270, {
     align: "center",
