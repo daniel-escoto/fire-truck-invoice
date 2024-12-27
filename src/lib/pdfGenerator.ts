@@ -30,28 +30,25 @@ async function loadImageAsBase64(imagePath: string): Promise<string> {
  * @param data - Listing response data.
  */
 async function createHeader(doc: jsPDF, data: GetListingResponse) {
-  // 🖼️ **Logo**
   try {
     const logoBase64 = await loadImageAsBase64(
       `${window.location.origin}/images/garage-logo.png`
     );
-    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20); // x, y, width, height
+    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20);
   } catch {
     console.warn("Failed to load logo image. Continuing without logo.");
   }
 
-  // 📝 **Invoice Title**
   doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
   doc.setFontSize(12);
-  doc.line(20, 45, 190, 45); // Horizontal line under title
+  doc.line(20, 45, 190, 45);
 
-  // 📸 **Listing Image**
   if (data.result.listing.imageUrls.length > 0) {
     try {
       const listingImageBase64 = await loadImageAsBase64(
         data.result.listing.imageUrls[0]
       );
-      doc.addImage(listingImageBase64, "JPEG", 20, 50, 170, 90); // x, y, width, height
+      doc.addImage(listingImageBase64, "JPEG", 20, 50, 170, 90);
     } catch {
       console.warn("Failed to load listing image. Continuing without image.");
     }
@@ -71,16 +68,43 @@ function createBuyerSellerSection(
   buyerEmail: string,
   sellerEmail: string
 ) {
-  // 🧑 **Buyer Details**
   doc.setFontSize(14).text("Buyer Information:", 20, 145);
   doc.setFontSize(12);
   doc.text(`Name: ${buyerName}`, 20, 155);
   doc.text(`Email: ${buyerEmail}`, 20, 165);
 
-  // 🏢 **Seller Details**
   doc.setFontSize(14).text("Seller Information:", 20, 180);
   doc.setFontSize(12);
   doc.text(`Email: ${sellerEmail}`, 20, 190);
+}
+
+/**
+ * Creates the listing details section of the invoice PDF.
+ * @param doc - The jsPDF document instance.
+ * @param data - Listing response data.
+ */
+function createListingDetailsSection(doc: jsPDF, data: GetListingResponse) {
+  doc.setFontSize(14).text("Listing Details:", 20, 210);
+  doc.setFontSize(12);
+
+  const listing = data.result.listing;
+
+  doc.text(`Title: ${listing.listingTitle}`, 20, 220);
+  doc.text(`Price: $${listing.sellingPrice}`, 20, 230);
+  doc.text(`Brand: ${listing.itemBrand}`, 20, 240);
+  doc.text(
+    `Location: ${listing.addressCity}, ${listing.addressState}`,
+    20,
+    250
+  );
+  doc.text(`Mileage: ${listing.mileage} miles`, 20, 260);
+  doc.text(`VIN: ${listing.vin || "N/A"}`, 20, 270);
+  doc.text(
+    `Description: ${listing.listingDescription || "No description provided."}`,
+    20,
+    280,
+    { maxWidth: 170 }
+  );
 }
 
 /**
@@ -104,22 +128,11 @@ export async function generateInvoicePDF(
     buyerEmail,
     data.result.listing.user.email
   ); // 🧑 Buyer & Seller Section
-
-  // 📋 **Listing Details**
-  doc.setFontSize(14).text("Listing Details:", 20, 210);
-  doc.setFontSize(12);
-  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 220);
-  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 230);
-  doc.text(
-    `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
-    20,
-    240
-  );
-  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 250);
+  createListingDetailsSection(doc, data); // 📋 Listing Details Section
 
   // 📌 **Footer**
-  doc.line(20, 260, 190, 260); // Horizontal line at footer
-  doc.setFontSize(10).text("Thank you for your business!", 105, 270, {
+  doc.line(20, 290, 190, 290); // Horizontal line at footer
+  doc.setFontSize(10).text("Thank you for your business!", 105, 300, {
     align: "center",
   });
 
