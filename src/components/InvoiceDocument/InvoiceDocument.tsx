@@ -45,23 +45,29 @@ export default function InvoiceDocument({
     <Document>
       <Page size="A4" style={styles.page}>
         <InvoiceHeader />
-        <BuyerInfo name={buyerName} email={buyerEmail} />
-        <SellerInfo
-          email={listing.user.email}
-          address={`${listing.addressPrimary}, ${listing.addressCity}, ${listing.addressState} ${listing.addressZip}`}
-        />
+
         <ListingOverview
           brand={listing.itemBrand}
           price={listing.sellingPrice}
           title={listing.listingTitle}
           vin={listing.vin}
         />
+
         <TechnicalSpecifications
           age={listing.itemAge}
           dimensions={`${listing.itemHeight} x ${listing.itemWidth}`}
           weight={listing.itemWeight}
         />
+
         {listing.isAuction && <AuctionDetails {...listing} />}
+
+        <BuyerInfo name={buyerName} email={buyerEmail} />
+
+        <SellerInfo
+          email={listing.user.email}
+          address={`${listing.addressPrimary}, ${listing.addressCity}, ${listing.addressState} ${listing.addressZip}`}
+        />
+
         <InvoiceFooter />
       </Page>
     </Document>
