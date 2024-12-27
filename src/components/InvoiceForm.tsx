@@ -59,7 +59,7 @@ export default function InvoiceForm({
           type="email"
           required
         />
-        <div className="h-5">
+        <div className="h-3">
           {emailError && (
             <span className="text-red-500 text-sm">{emailError}</span>
           )}
