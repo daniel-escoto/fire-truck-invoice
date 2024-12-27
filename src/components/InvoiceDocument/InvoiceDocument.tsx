@@ -1,5 +1,5 @@
 import React from "react";
-import { Document, Page, StyleSheet } from "@react-pdf/renderer";
+import { Document, Page, StyleSheet, Font } from "@react-pdf/renderer";
 import { InvoiceHeader } from "./InvoiceHeader";
 import { BuyerInfo } from "./BuyerInfo";
 import { SellerInfo } from "./SellerInfo";
@@ -9,10 +9,20 @@ import { AuctionDetails } from "./AuctionDetails";
 import { InvoiceFooter } from "./InvoiceFooter";
 import { GetListingResponse } from "@/lib/types";
 
+Font.register({
+  family: "Inter",
+  fonts: [
+    { src: "/fonts/Inter/Inter-Regular.ttf", fontWeight: "normal" },
+    { src: "/fonts/Inter/Inter-Medium.ttf", fontWeight: "medium" },
+    { src: "/fonts/Inter/Inter-Bold.ttf", fontWeight: "bold" },
+    { src: "/fonts/Inter/Inter-Italic.ttf", fontStyle: "italic" },
+  ],
+});
+
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    fontFamily: "Helvetica",
+    fontFamily: "Inter",
     fontSize: 12,
     color: "#333",
   },
