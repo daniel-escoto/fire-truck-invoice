@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import InvoiceDocument from "@/components/InvoiceDocument";
@@ -12,6 +11,7 @@ interface InvoiceModalProps {
   buyerName: string;
   buyerEmail: string;
   onClose: () => void;
+  isOpen: boolean;
 }
 
 export default function InvoiceModal({
@@ -19,9 +19,10 @@ export default function InvoiceModal({
   buyerName,
   buyerEmail,
   onClose,
+  isOpen,
 }: InvoiceModalProps) {
   return (
-    <Modal onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col items-center gap-4">
         {/* PDF Viewer */}
         <div className="w-full h-96 border border-gray-200 rounded-md overflow-hidden">
@@ -46,7 +47,7 @@ export default function InvoiceModal({
             }
             fileName="invoice.pdf"
           >
-            <Button>Download</Button>
+            <Button>Download PDF</Button>
           </PDFDownloadLink>
           <Button onClick={onClose}>Close</Button>
         </div>

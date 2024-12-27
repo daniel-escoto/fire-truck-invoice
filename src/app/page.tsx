@@ -26,7 +26,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      <main className="flex-grow flex flex-col items-center justify-center p-8">
+      <main className="flex flex-col items-center justify-center flex-grow gap-8 p-8">
         <Header />
 
         <InvoiceForm
@@ -40,12 +40,13 @@ export default function Home() {
           isLoading={isLoading}
         />
         {error && <ErrorMessage message={error} />}
-        {isModalOpen && data && (
+        {data && (
           <InvoiceModal
             data={data}
             buyerName={buyerName}
             buyerEmail={buyerEmail}
             onClose={() => setIsModalOpen(false)}
+            isOpen={isModalOpen}
           />
         )}
       </main>
