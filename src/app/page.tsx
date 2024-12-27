@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import InvoiceForm from "@/components/InvoiceForm";
 import ErrorMessage from "@/components/ErrorMessage";
 import InvoiceModal from "@/components/InvoiceModal";
+import Footer from "@/components/Footer";
 import { useInvoice } from "@/hooks/useInvoice";
 
 export default function Home() {
@@ -24,27 +25,32 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-8">
-      <Header />
-      <InvoiceForm
-        link={link}
-        setLink={setLink}
-        buyerName={buyerName}
-        setBuyerName={setBuyerName}
-        buyerEmail={buyerEmail}
-        setBuyerEmail={setBuyerEmail}
-        onSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      {error && <ErrorMessage message={error} />}
-      {isModalOpen && data && (
-        <InvoiceModal
-          data={data}
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <main className="flex-grow flex flex-col items-center justify-center p-8">
+        <Header />
+
+        <InvoiceForm
+          link={link}
+          setLink={setLink}
           buyerName={buyerName}
+          setBuyerName={setBuyerName}
           buyerEmail={buyerEmail}
-          onClose={() => setIsModalOpen(false)}
+          setBuyerEmail={setBuyerEmail}
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
         />
-      )}
+        {error && <ErrorMessage message={error} />}
+        {isModalOpen && data && (
+          <InvoiceModal
+            data={data}
+            buyerName={buyerName}
+            buyerEmail={buyerEmail}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 }
