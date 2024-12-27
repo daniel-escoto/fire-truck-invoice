@@ -6,7 +6,6 @@ import InvoiceForm from "@/components/InvoiceForm";
 import ErrorMessage from "@/components/ErrorMessage";
 import InvoiceModal from "@/components/InvoiceModal";
 import { useInvoice } from "@/hooks/useInvoice";
-import { generateInvoicePDF, downloadInvoicePDF } from "@/lib/pdfGenerator";
 
 export default function Home() {
   const { data, error, isLoading, fetchInvoiceData } = useInvoice();
@@ -14,41 +13,13 @@ export default function Home() {
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [pdfDataUri, setPdfDataUri] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     try {
-      const fetchedData = await fetchInvoiceData(link);
-      const pdfUri = await generateInvoicePDF(
-        fetchedData,
-        buyerName,
-        buyerEmail
-      );
-
-      // Convert Data URI to Blob URL
-      const byteString = atob(pdfUri.split(",")[1]);
-      const mimeString = pdfUri.split(",")[0].split(":")[1].split(";")[0];
-      const ab = new ArrayBuffer(byteString.length);
-      const ia = new Uint8Array(ab);
-      for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-      }
-      const blob = new Blob([ab], { type: mimeString });
-      const blobUrl = URL.createObjectURL(blob);
-
-      setPdfDataUri(blobUrl);
+      await fetchInvoiceData(link);
       setIsModalOpen(true);
     } catch (error) {
-      console.error("Failed to fetch or generate PDF", error);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!data) return;
-    try {
-      await downloadInvoicePDF(data, buyerName, buyerEmail);
-    } catch (error) {
-      console.error("Failed to download PDF:", error);
+      console.error("Failed to fetch invoice data", error);
     }
   };
 
@@ -66,10 +37,11 @@ export default function Home() {
         isLoading={isLoading}
       />
       {error && <ErrorMessage message={error} />}
-      {isModalOpen && pdfDataUri && data && (
+      {isModalOpen && data && (
         <InvoiceModal
-          pdfDataUri={pdfDataUri}
-          onDownload={handleDownload}
+          data={data}
+          buyerName={buyerName}
+          buyerEmail={buyerEmail}
           onClose={() => setIsModalOpen(false)}
         />
       )}
