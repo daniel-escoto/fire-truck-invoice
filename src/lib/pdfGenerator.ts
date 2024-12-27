@@ -25,8 +25,37 @@ async function loadImageAsBase64(imagePath: string): Promise<string> {
 }
 
 /**
+ * Adds text with pagination support.
+ * @param doc - jsPDF instance.
+ * @param text - Text to render.
+ * @param x - Horizontal position.
+ * @param y - Vertical position.
+ * @param maxWidth - Max width of text.
+ * @returns Updated vertical position.
+ */
+function addTextWithPagination(
+  doc: jsPDF,
+  text: string,
+  x: number,
+  y: number,
+  maxWidth: number = 170
+): number {
+  const pageHeight = doc.internal.pageSize.height;
+  const textHeight = doc.getTextDimensions(text, { maxWidth }).h;
+  const margin = 10;
+
+  if (y + textHeight > pageHeight - margin) {
+    doc.addPage();
+    y = margin;
+  }
+
+  doc.text(text, x, y, { maxWidth });
+  return y + textHeight + 5;
+}
+
+/**
  * Creates the header section of the invoice PDF.
- * @param doc - The jsPDF document instance.
+ * @param doc - jsPDF instance.
  * @param data - Listing response data.
  */
 async function createHeader(doc: jsPDF, data: GetListingResponse) {
@@ -40,7 +69,6 @@ async function createHeader(doc: jsPDF, data: GetListingResponse) {
   }
 
   doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
-  doc.setFontSize(12);
   doc.line(20, 45, 190, 45);
 
   if (data.result.listing.imageUrls.length > 0) {
@@ -56,11 +84,11 @@ async function createHeader(doc: jsPDF, data: GetListingResponse) {
 }
 
 /**
- * Creates the buyer and seller section of the invoice PDF.
- * @param doc - The jsPDF document instance.
- * @param buyerName - Name of the buyer.
- * @param buyerEmail - Email of the buyer.
- * @param sellerEmail - Email of the seller.
+ * Creates the buyer and seller section.
+ * @param doc - jsPDF instance.
+ * @param buyerName - Buyer name.
+ * @param buyerEmail - Buyer email.
+ * @param sellerEmail - Seller email.
  */
 function createBuyerSellerSection(
   doc: jsPDF,
@@ -68,51 +96,69 @@ function createBuyerSellerSection(
   buyerEmail: string,
   sellerEmail: string
 ) {
-  doc.setFontSize(14).text("Buyer Information:", 20, 145);
-  doc.setFontSize(12);
-  doc.text(`Name: ${buyerName}`, 20, 155);
-  doc.text(`Email: ${buyerEmail}`, 20, 165);
+  let y = 145;
 
-  doc.setFontSize(14).text("Seller Information:", 20, 180);
-  doc.setFontSize(12);
-  doc.text(`Email: ${sellerEmail}`, 20, 190);
+  doc.setFontSize(14).text("Buyer Information:", 20, y);
+  y += 10;
+  y = addTextWithPagination(doc, `Name: ${buyerName}`, 20, y);
+  y = addTextWithPagination(doc, `Email: ${buyerEmail}`, 20, y);
+
+  y += 10;
+  doc.setFontSize(14).text("Seller Information:", 20, y);
+  y += 10;
+  y = addTextWithPagination(doc, `Email: ${sellerEmail}`, 20, y);
 }
 
 /**
- * Creates the listing details section of the invoice PDF.
- * @param doc - The jsPDF document instance.
+ * Creates the listing details section.
+ * @param doc - jsPDF instance.
  * @param data - Listing response data.
  */
 function createListingDetailsSection(doc: jsPDF, data: GetListingResponse) {
-  doc.setFontSize(14).text("Listing Details:", 20, 210);
-  doc.setFontSize(12);
+  let y = 210;
+
+  doc.setFontSize(14).text("Listing Details:", 20, y);
+  y += 10;
 
   const listing = data.result.listing;
-
-  doc.text(`Title: ${listing.listingTitle}`, 20, 220);
-  doc.text(`Price: $${listing.sellingPrice}`, 20, 230);
-  doc.text(`Brand: ${listing.itemBrand}`, 20, 240);
-  doc.text(
+  y = addTextWithPagination(doc, `Title: ${listing.listingTitle}`, 20, y);
+  y = addTextWithPagination(doc, `Price: $${listing.sellingPrice}`, 20, y);
+  y = addTextWithPagination(doc, `Brand: ${listing.itemBrand}`, 20, y);
+  y = addTextWithPagination(
+    doc,
     `Location: ${listing.addressCity}, ${listing.addressState}`,
     20,
-    250
+    y
   );
-  doc.text(`Mileage: ${listing.mileage} miles`, 20, 260);
-  doc.text(`VIN: ${listing.vin || "N/A"}`, 20, 270);
-  doc.text(
+  y = addTextWithPagination(doc, `Mileage: ${listing.mileage} miles`, 20, y);
+  y = addTextWithPagination(doc, `VIN: ${listing.vin || "N/A"}`, 20, y);
+  y = addTextWithPagination(
+    doc,
     `Description: ${listing.listingDescription || "No description provided."}`,
     20,
-    280,
-    { maxWidth: 170 }
+    y
   );
+}
+
+/**
+ * Creates the footer section.
+ * @param doc - jsPDF instance.
+ */
+function createFooter(doc: jsPDF) {
+  const pageHeight = doc.internal.pageSize.height;
+  doc.line(20, pageHeight - 20, 190, pageHeight - 20);
+  doc
+    .setFontSize(10)
+    .text("Thank you for your business!", 105, pageHeight - 10, {
+      align: "center",
+    });
 }
 
 /**
  * Generates a PDF invoice as a data URI.
  * @param data - Listing response data.
- * @param buyerName - Name of the buyer.
- * @param buyerEmail - Email of the buyer.
- * @returns Data URI of the generated PDF.
+ * @param buyerName - Buyer name.
+ * @param buyerEmail - Buyer email.
  */
 export async function generateInvoicePDF(
   data: GetListingResponse,
@@ -121,20 +167,15 @@ export async function generateInvoicePDF(
 ): Promise<string> {
   const doc = new jsPDF();
 
-  await createHeader(doc, data); // 📝 Header Section
+  await createHeader(doc, data);
   createBuyerSellerSection(
     doc,
     buyerName,
     buyerEmail,
     data.result.listing.user.email
-  ); // 🧑 Buyer & Seller Section
-  createListingDetailsSection(doc, data); // 📋 Listing Details Section
-
-  // 📌 **Footer**
-  doc.line(20, 290, 190, 290); // Horizontal line at footer
-  doc.setFontSize(10).text("Thank you for your business!", 105, 300, {
-    align: "center",
-  });
+  );
+  createListingDetailsSection(doc, data);
+  createFooter(doc);
 
   return doc.output("datauristring");
 }
@@ -142,8 +183,8 @@ export async function generateInvoicePDF(
 /**
  * Downloads a PDF invoice directly.
  * @param data - Listing response data.
- * @param buyerName - Name of the buyer.
- * @param buyerEmail - Email of the buyer.
+ * @param buyerName - Buyer name.
+ * @param buyerEmail - Buyer email.
  */
 export async function downloadInvoicePDF(
   data: GetListingResponse,
