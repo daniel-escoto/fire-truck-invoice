@@ -45,9 +45,8 @@ export default function InvoiceModal({
               />
             }
             fileName="invoice.pdf"
-            className="px-4 py-2 bg-blue-600 text-white rounded"
           >
-            Download
+            <Button>Download</Button>
           </PDFDownloadLink>
           <Button onClick={onClose}>Close</Button>
         </div>
