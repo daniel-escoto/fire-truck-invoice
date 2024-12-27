@@ -29,9 +29,16 @@ const styles = StyleSheet.create({
     borderBottom: 1,
     paddingBottom: 10,
   },
-  logo: {
+  logoContainer: {
     width: 50,
     height: 50,
+    maxWidth: 50,
+    overflow: "hidden",
+  },
+  logo: {
+    objectFit: "contain",
+    width: "100%",
+    height: "100%",
   },
   title: {
     fontSize: 24,
@@ -79,8 +86,10 @@ export default function InvoiceDocument({
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <Image style={styles.logo} src="/images/garage-logo.png" />
+          <View style={styles.logoContainer}>
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
+            <Image style={styles.logo} src="/images/garage-logo.png" />
+          </View>
           <Text style={styles.title}>Invoice</Text>
           <Text style={styles.date}>
             Date: {new Date().toLocaleDateString()}
