@@ -59,28 +59,33 @@ function addTextWithPagination(
  * @param data - Listing response data.
  */
 async function createHeader(doc: jsPDF, data: GetListingResponse) {
+  // Logo
   try {
     const logoBase64 = await loadImageAsBase64(
       `${window.location.origin}/images/garage-logo.png`
     );
-    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20);
+    doc.addImage(logoBase64, "PNG", 20, 10, 30, 15); // Smaller logo
   } catch {
     console.warn("Failed to load logo image. Continuing without logo.");
   }
 
-  doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
-  doc.line(20, 45, 190, 45);
+  // Title
+  doc.setFontSize(22).text("Invoice", 105, 30, { align: "center" });
+  doc.line(20, 35, 190, 35);
 
+  // Listing Image
   if (data.result.listing.imageUrls.length > 0) {
     try {
       const listingImageBase64 = await loadImageAsBase64(
         data.result.listing.imageUrls[0]
       );
-      doc.addImage(listingImageBase64, "JPEG", 20, 50, 170, 90);
+      doc.addImage(listingImageBase64, "JPEG", 20, 40, 80, 50); // Smaller listing image
     } catch {
       console.warn("Failed to load listing image. Continuing without image.");
     }
   }
+
+  doc.line(20, 95, 190, 95);
 }
 
 /**
@@ -89,24 +94,49 @@ async function createHeader(doc: jsPDF, data: GetListingResponse) {
  * @param buyerName - Buyer name.
  * @param buyerEmail - Buyer email.
  * @param sellerEmail - Seller email.
+ * @param sellerAddress - Seller address details.
  */
 function createBuyerSellerSection(
   doc: jsPDF,
   buyerName: string,
   buyerEmail: string,
-  sellerEmail: string
+  sellerEmail: string,
+  sellerAddress: {
+    addressPrimary: string;
+    addressSecondary: string;
+    addressCity: string;
+    addressState: string;
+    addressZip: string;
+  }
 ) {
-  let y = 145;
+  let y = 100;
 
+  // Buyer Information
   doc.setFontSize(14).text("Buyer Information:", 20, y);
   y += 10;
   y = addTextWithPagination(doc, `Name: ${buyerName}`, 20, y);
   y = addTextWithPagination(doc, `Email: ${buyerEmail}`, 20, y);
 
+  // Seller Information
   y += 10;
-  doc.setFontSize(14).text("Seller Information:", 20, y);
-  y += 10;
-  y = addTextWithPagination(doc, `Email: ${sellerEmail}`, 20, y);
+  doc.setFontSize(14).text("Seller Information:", 120, 100);
+  doc.setFontSize(12);
+  y = addTextWithPagination(doc, `Email: ${sellerEmail}`, 120, 110);
+  y = addTextWithPagination(
+    doc,
+    `Address: ${sellerAddress.addressPrimary}`,
+    120,
+    y
+  );
+  if (sellerAddress.addressSecondary) {
+    y = addTextWithPagination(doc, `${sellerAddress.addressSecondary}`, 120, y);
+  }
+  y = addTextWithPagination(
+    doc,
+    `${sellerAddress.addressCity}, ${sellerAddress.addressState} ${sellerAddress.addressZip}`,
+    120,
+    y
+  );
 }
 
 /**
@@ -115,7 +145,7 @@ function createBuyerSellerSection(
  * @param data - Listing response data.
  */
 function createListingDetailsSection(doc: jsPDF, data: GetListingResponse) {
-  let y = 210;
+  let y = 160;
 
   doc.setFontSize(14).text("Listing Details:", 20, y);
   y += 10;
@@ -155,10 +185,7 @@ function createFooter(doc: jsPDF) {
 }
 
 /**
- * Generates a PDF invoice as a data URI.
- * @param data - Listing response data.
- * @param buyerName - Buyer name.
- * @param buyerEmail - Buyer email.
+ * Generates a PDF invoice.
  */
 export async function generateInvoicePDF(
   data: GetListingResponse,
@@ -172,7 +199,14 @@ export async function generateInvoicePDF(
     doc,
     buyerName,
     buyerEmail,
-    data.result.listing.user.email
+    data.result.listing.user.email,
+    {
+      addressPrimary: data.result.listing.addressPrimary,
+      addressSecondary: data.result.listing.addressSecondary,
+      addressCity: data.result.listing.addressCity,
+      addressState: data.result.listing.addressState,
+      addressZip: data.result.listing.addressZip,
+    }
   );
   createListingDetailsSection(doc, data);
   createFooter(doc);
