@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   logoContainer: {
-    width: 50,
-    height: 50,
+    width: 72,
+    height: 19,
     maxWidth: 50,
     overflow: "hidden",
   },
