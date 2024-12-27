@@ -59,19 +59,24 @@ function addTextWithPagination(
  * @param data - Listing response data.
  */
 async function createHeader(doc: jsPDF, data: GetListingResponse) {
+  let y = 20;
+
   // Logo
   try {
     const logoBase64 = await loadImageAsBase64(
       `${window.location.origin}/images/garage-logo.png`
     );
-    doc.addImage(logoBase64, "PNG", 20, 10, 30, 15); // Smaller logo
+    doc.addImage(logoBase64, "PNG", 20, y, 30, 15);
+    y += 20;
   } catch {
     console.warn("Failed to load logo image. Continuing without logo.");
   }
 
   // Title
-  doc.setFontSize(22).text("Invoice", 105, 30, { align: "center" });
-  doc.line(20, 35, 190, 35);
+  doc.setFontSize(22).text("Invoice", 105, y, { align: "center" });
+  y += 10;
+  doc.line(20, y, 190, y);
+  y += 10;
 
   // Listing Image
   if (data.result.listing.imageUrls.length > 0) {
@@ -79,27 +84,53 @@ async function createHeader(doc: jsPDF, data: GetListingResponse) {
       const listingImageBase64 = await loadImageAsBase64(
         data.result.listing.imageUrls[0]
       );
-      doc.addImage(listingImageBase64, "JPEG", 20, 40, 80, 50); // Smaller listing image
+      doc.addImage(listingImageBase64, "JPEG", 20, y, 80, 50);
+      y += 60;
     } catch {
       console.warn("Failed to load listing image. Continuing without image.");
     }
   }
 
-  doc.line(20, 95, 190, 95);
+  doc.line(20, y, 190, y);
+  y += 10;
+
+  return y;
 }
 
 /**
- * Creates the buyer and seller section.
+ * Creates the buyer section.
  * @param doc - jsPDF instance.
+ * @param y - Current vertical position.
  * @param buyerName - Buyer name.
  * @param buyerEmail - Buyer email.
+ */
+function createBuyerSection(
+  doc: jsPDF,
+  y: number,
+  buyerName: string,
+  buyerEmail: string
+): number {
+  doc.setFontSize(14).text("Buyer Information:", 20, y);
+  y += 10;
+  y = addTextWithPagination(doc, `Name: ${buyerName}`, 20, y);
+  y = addTextWithPagination(doc, `Email: ${buyerEmail}`, 20, y);
+
+  doc.line(20, y, 190, y);
+  y += 10;
+
+  return y;
+}
+
+/**
+ * Creates the seller section.
+ * @param doc - jsPDF instance.
+ * @param y - Current vertical position.
  * @param sellerEmail - Seller email.
  * @param sellerAddress - Seller address details.
  */
-function createBuyerSellerSection(
+function createSellerSection(
   doc: jsPDF,
-  buyerName: string,
-  buyerEmail: string,
+  y: number,
   sellerEmail: string,
   sellerAddress: {
     addressPrimary: string;
@@ -108,45 +139,43 @@ function createBuyerSellerSection(
     addressState: string;
     addressZip: string;
   }
-) {
-  let y = 100;
-
-  // Buyer Information
-  doc.setFontSize(14).text("Buyer Information:", 20, y);
+): number {
+  doc.setFontSize(14).text("Seller Information:", 20, y);
   y += 10;
-  y = addTextWithPagination(doc, `Name: ${buyerName}`, 20, y);
-  y = addTextWithPagination(doc, `Email: ${buyerEmail}`, 20, y);
-
-  // Seller Information
-  y += 10;
-  doc.setFontSize(14).text("Seller Information:", 120, 100);
-  doc.setFontSize(12);
-  y = addTextWithPagination(doc, `Email: ${sellerEmail}`, 120, 110);
+  y = addTextWithPagination(doc, `Email: ${sellerEmail}`, 20, y);
   y = addTextWithPagination(
     doc,
     `Address: ${sellerAddress.addressPrimary}`,
-    120,
+    20,
     y
   );
   if (sellerAddress.addressSecondary) {
-    y = addTextWithPagination(doc, `${sellerAddress.addressSecondary}`, 120, y);
+    y = addTextWithPagination(doc, `${sellerAddress.addressSecondary}`, 20, y);
   }
   y = addTextWithPagination(
     doc,
     `${sellerAddress.addressCity}, ${sellerAddress.addressState} ${sellerAddress.addressZip}`,
-    120,
+    20,
     y
   );
+
+  doc.line(20, y, 190, y);
+  y += 10;
+
+  return y;
 }
 
 /**
  * Creates the listing details section.
  * @param doc - jsPDF instance.
+ * @param y - Current vertical position.
  * @param data - Listing response data.
  */
-function createListingDetailsSection(doc: jsPDF, data: GetListingResponse) {
-  let y = 160;
-
+function createListingDetailsSection(
+  doc: jsPDF,
+  y: number,
+  data: GetListingResponse
+): number {
   doc.setFontSize(14).text("Listing Details:", 20, y);
   y += 10;
 
@@ -161,27 +190,8 @@ function createListingDetailsSection(doc: jsPDF, data: GetListingResponse) {
     y
   );
   y = addTextWithPagination(doc, `Mileage: ${listing.mileage} miles`, 20, y);
-  y = addTextWithPagination(doc, `VIN: ${listing.vin || "N/A"}`, 20, y);
-  y = addTextWithPagination(
-    doc,
-    `Description: ${listing.listingDescription || "No description provided."}`,
-    20,
-    y
-  );
-}
 
-/**
- * Creates the footer section.
- * @param doc - jsPDF instance.
- */
-function createFooter(doc: jsPDF) {
-  const pageHeight = doc.internal.pageSize.height;
-  doc.line(20, pageHeight - 20, 190, pageHeight - 20);
-  doc
-    .setFontSize(10)
-    .text("Thank you for your business!", 105, pageHeight - 10, {
-      align: "center",
-    });
+  return y;
 }
 
 /**
@@ -194,22 +204,20 @@ export async function generateInvoicePDF(
 ): Promise<string> {
   const doc = new jsPDF();
 
-  await createHeader(doc, data);
-  createBuyerSellerSection(
-    doc,
-    buyerName,
-    buyerEmail,
-    data.result.listing.user.email,
-    {
-      addressPrimary: data.result.listing.addressPrimary,
-      addressSecondary: data.result.listing.addressSecondary,
-      addressCity: data.result.listing.addressCity,
-      addressState: data.result.listing.addressState,
-      addressZip: data.result.listing.addressZip,
-    }
-  );
-  createListingDetailsSection(doc, data);
-  createFooter(doc);
+  let y = await createHeader(doc, data);
+  y = createBuyerSection(doc, y, buyerName, buyerEmail);
+  y = createSellerSection(doc, y, data.result.listing.user.email, {
+    addressPrimary: data.result.listing.addressPrimary,
+    addressSecondary: data.result.listing.addressSecondary,
+    addressCity: data.result.listing.addressCity,
+    addressState: data.result.listing.addressState,
+    addressZip: data.result.listing.addressZip,
+  });
+  y = createListingDetailsSection(doc, y, data);
+
+  doc.setFontSize(10).text("Thank you for your business!", 105, y + 10, {
+    align: "center",
+  });
 
   return doc.output("datauristring");
 }
