@@ -2,7 +2,7 @@
 
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
-import InvoiceDocument from "@/components/InvoiceDocument";
+import InvoiceDocument from "@/components/InvoiceDocument/InvoiceDocument";
 import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
 import { GetListingResponse } from "@/lib/types";
 
