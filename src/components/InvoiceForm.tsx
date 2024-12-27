@@ -26,7 +26,9 @@ export default function InvoiceForm({
   isLoading,
 }: InvoiceFormProps) {
   const [emailError, setEmailError] = useState<string>("");
+  const [linkError, setLinkError] = useState<string>("");
 
+  // Validate Email
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
@@ -38,6 +40,22 @@ export default function InvoiceForm({
       setEmailError("Please enter a valid email address");
     } else {
       setEmailError("");
+    }
+  };
+
+  // Validate URL
+  const validateURL = (url: string) => {
+    const urlRegex =
+      /^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/[^\s]*)?$/;
+    return urlRegex.test(url);
+  };
+
+  const handleLinkChange = (url: string) => {
+    setLink(url);
+    if (!validateURL(url) && url.trim()) {
+      setLinkError("Please enter a valid URL (e.g., https://example.com)");
+    } else {
+      setLinkError("");
     }
   };
 
@@ -65,13 +83,21 @@ export default function InvoiceForm({
           )}
         </div>
       </div>
-      <TextInput
-        label="Listing Link"
-        value={link}
-        onChange={setLink}
-        placeholder="Paste a listing link"
-        required
-      />
+      <div className="w-full">
+        <TextInput
+          label="Listing Link"
+          value={link}
+          onChange={handleLinkChange}
+          placeholder="Paste a listing link"
+          type="text"
+          required
+        />
+        <div className="h-3">
+          {linkError && (
+            <span className="text-red-500 text-sm">{linkError}</span>
+          )}
+        </div>
+      </div>
       <Button
         onClick={onSubmit}
         disabled={
@@ -79,6 +105,7 @@ export default function InvoiceForm({
           !buyerName.trim() ||
           !buyerEmail.trim() ||
           emailError !== "" ||
+          linkError !== "" ||
           isLoading
         }
       >
