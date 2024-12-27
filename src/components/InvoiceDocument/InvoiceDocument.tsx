@@ -51,6 +51,7 @@ export default function InvoiceDocument({
           price={listing.sellingPrice}
           title={listing.listingTitle}
           vin={listing.vin}
+          imageUrl={listing.imageUrls[0] || null}
         />
 
         <TechnicalSpecifications
