@@ -25,7 +25,6 @@ export default function InvoiceModal({
 }: InvoiceModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      {/* PDF Viewer */}
       <div className="flex-1 overflow-y-auto border border-gray-200 rounded-md">
         <PDFViewer style={{ width: "100%", height: "60vh" }}>
           <InvoiceDocument
@@ -37,7 +36,6 @@ export default function InvoiceModal({
         </PDFViewer>
       </div>
 
-      {/* Actions */}
       <div className="flex justify-end gap-4 mt-4 border-t pt-4">
         <PDFDownloadLink
           document={

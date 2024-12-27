@@ -21,12 +21,10 @@ export default function TextInput({
 }: TextInputProps) {
   return (
     <div className="w-full">
-      {/* Label */}
       <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
 
-      {/* Input Field */}
       <input
         type={type}
         value={value}
@@ -53,7 +51,6 @@ export default function TextInput({
         `}
       />
 
-      {/* Error Message */}
       {errorMessage && (
         <p className="text-sm text-red-500 mt-1">{errorMessage}</p>
       )}
