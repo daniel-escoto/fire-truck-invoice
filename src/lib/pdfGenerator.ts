@@ -25,6 +25,40 @@ async function loadImageAsBase64(imagePath: string): Promise<string> {
 }
 
 /**
+ * Creates the header section of the invoice PDF.
+ * @param doc - The jsPDF document instance.
+ * @param data - Listing response data.
+ */
+async function createHeader(doc: jsPDF, data: GetListingResponse) {
+  // 🖼️ **Logo**
+  try {
+    const logoBase64 = await loadImageAsBase64(
+      `${window.location.origin}/images/garage-logo.png`
+    );
+    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20); // x, y, width, height
+  } catch {
+    console.warn("Failed to load logo image. Continuing without logo.");
+  }
+
+  // 📝 **Invoice Title**
+  doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
+  doc.setFontSize(12);
+  doc.line(20, 45, 190, 45); // Horizontal line under title
+
+  // 📸 **Listing Image**
+  if (data.result.listing.imageUrls.length > 0) {
+    try {
+      const listingImageBase64 = await loadImageAsBase64(
+        data.result.listing.imageUrls[0]
+      );
+      doc.addImage(listingImageBase64, "JPEG", 20, 50, 170, 90); // x, y, width, height
+    } catch {
+      console.warn("Failed to load listing image. Continuing without image.");
+    }
+  }
+}
+
+/**
  * Generates a PDF invoice as a data URI.
  * @param data - Listing response data.
  * @param buyerName - Name of the buyer.
@@ -38,38 +72,25 @@ export async function generateInvoicePDF(
 ): Promise<string> {
   const doc = new jsPDF();
 
-  // Add Logo
-  try {
-    const logoBase64 = await loadImageAsBase64(
-      `${window.location.origin}/images/garage-logo.png`
-    );
-    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20); // x, y, width, height
-  } catch {
-    console.warn("Failed to load logo image. Continuing without logo.");
-  }
-
-  // Invoice Header
-  doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
-  doc.setFontSize(12);
-  doc.line(20, 45, 190, 45); // Horizontal line under title
+  await createHeader(doc, data); // 📝 Use the new header function
 
   // Buyer Details
-  doc.setFontSize(14).text("Buyer Information:", 20, 55);
+  doc.setFontSize(14).text("Buyer Information:", 20, 145);
   doc.setFontSize(12);
-  doc.text(`Name: ${buyerName}`, 20, 65);
-  doc.text(`Email: ${buyerEmail}`, 20, 75);
+  doc.text(`Name: ${buyerName}`, 20, 155);
+  doc.text(`Email: ${buyerEmail}`, 20, 165);
 
   // Listing Details
-  doc.setFontSize(14).text("Listing Details:", 20, 90);
+  doc.setFontSize(14).text("Listing Details:", 20, 180);
   doc.setFontSize(12);
-  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 100);
-  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 110);
+  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 190);
+  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 200);
   doc.text(
     `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
     20,
-    120
+    210
   );
-  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 130);
+  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 220);
 
   // Footer
   doc.line(20, 260, 190, 260); // Horizontal line at footer
@@ -91,50 +112,16 @@ export async function downloadInvoicePDF(
   buyerName: string,
   buyerEmail: string
 ): Promise<void> {
-  const doc = new jsPDF();
-
-  // Add Logo
-  try {
-    const logoBase64 = await loadImageAsBase64(
-      `${window.location.origin}/images/garage-logo.png`
-    );
-    doc.addImage(logoBase64, "PNG", 20, 10, 50, 20); // x, y, width, height
-  } catch {
-    console.warn("Failed to load logo image. Continuing without logo.");
+  const pdfDataUri = await generateInvoicePDF(data, buyerName, buyerEmail);
+  const byteString = atob(pdfDataUri.split(",")[1]);
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
   }
+  const blob = new Blob([ab], { type: "application/pdf" });
+  const pdfUrl = URL.createObjectURL(blob);
 
-  // Invoice Header
-  doc.setFontSize(20).text("Invoice", 105, 40, { align: "center" });
-  doc.setFontSize(12);
-  doc.line(20, 45, 190, 45); // Horizontal line under title
-
-  // Buyer Details
-  doc.setFontSize(14).text("Buyer Information:", 20, 55);
-  doc.setFontSize(12);
-  doc.text(`Name: ${buyerName}`, 20, 65);
-  doc.text(`Email: ${buyerEmail}`, 20, 75);
-
-  // Listing Details
-  doc.setFontSize(14).text("Listing Details:", 20, 90);
-  doc.setFontSize(12);
-  doc.text(`Title: ${data.result.listing.listingTitle}`, 20, 100);
-  doc.text(`Price: $${data.result.listing.sellingPrice}`, 20, 110);
-  doc.text(
-    `Location: ${data.result.listing.addressCity}, ${data.result.listing.addressState}`,
-    20,
-    120
-  );
-  doc.text(`Mileage: ${data.result.listing.mileage} miles`, 20, 130);
-
-  // Footer
-  doc.line(20, 260, 190, 260); // Horizontal line at footer
-  doc.setFontSize(10).text("Thank you for your business!", 105, 270, {
-    align: "center",
-  });
-
-  // Trigger Download
-  const pdfBlob = doc.output("blob");
-  const pdfUrl = URL.createObjectURL(pdfBlob);
   const link = document.createElement("a");
   link.href = pdfUrl;
   link.download = "invoice.pdf";
