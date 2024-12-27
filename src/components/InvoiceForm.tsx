@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Button from "@/components/Button";
 import TextInput from "@/components/TextInput";
 
@@ -24,6 +25,22 @@ export default function InvoiceForm({
   onSubmit,
   isLoading,
 }: InvoiceFormProps) {
+  const [emailError, setEmailError] = useState<string>("");
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailChange = (email: string) => {
+    setBuyerEmail(email);
+    if (!validateEmail(email) && email.trim()) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 items-center w-full max-w-md">
       <TextInput
@@ -33,14 +50,21 @@ export default function InvoiceForm({
         placeholder="Enter buyer's name"
         required
       />
-      <TextInput
-        label="Buyer Email"
-        value={buyerEmail}
-        onChange={setBuyerEmail}
-        placeholder="Enter buyer's email"
-        type="email"
-        required
-      />
+      <div className="w-full">
+        <TextInput
+          label="Buyer Email"
+          value={buyerEmail}
+          onChange={handleEmailChange}
+          placeholder="Enter buyer's email"
+          type="email"
+          required
+        />
+        <div className="h-5">
+          {emailError && (
+            <span className="text-red-500 text-sm">{emailError}</span>
+          )}
+        </div>
+      </div>
       <TextInput
         label="Listing Link"
         value={link}
@@ -51,7 +75,11 @@ export default function InvoiceForm({
       <Button
         onClick={onSubmit}
         disabled={
-          !link.trim() || !buyerName.trim() || !buyerEmail.trim() || isLoading
+          !link.trim() ||
+          !buyerName.trim() ||
+          !buyerEmail.trim() ||
+          emailError !== "" ||
+          isLoading
         }
       >
         {isLoading ? "Generating..." : "Generate Invoice"}
