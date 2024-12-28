@@ -7,14 +7,24 @@ interface AuctionDetailsProps {
   finalPrice: number | null;
 }
 
+function formatDate(dateString: string | null): string {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export function AuctionDetails({
   expirationDate,
   finalPrice,
 }: AuctionDetailsProps) {
   return (
     <InvoiceSection title="Auction Details">
-      <Text>Expiration Date: {expirationDate || "N/A"}</Text>
-      <Text>Final Price: ${finalPrice || "N/A"}</Text>
+      <Text>Expiration Date: {formatDate(expirationDate)}</Text>
+      <Text>Final Price: {finalPrice ? `$${finalPrice}` : "N/A"}</Text>
     </InvoiceSection>
   );
 }
